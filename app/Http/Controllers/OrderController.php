@@ -32,7 +32,7 @@ class OrderController extends Controller
                     'price_data' => [
                         'currency' => 'usd',
                         'product_data' => [
-                            'name' => 'Fashion Store'
+                            'name' => 'Laravel 12 Shopping Cart'
                         ],
                         'unit_amount' => $this->calculateTotalToPay($this->cart),
                     ],
