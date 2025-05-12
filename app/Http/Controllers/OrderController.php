@@ -7,6 +7,7 @@ use ErrorException;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Illuminate\Support\Facades\Log;
+use Stripe\Exception\InvalidRequestException;
 
 class OrderController extends Controller
 {
@@ -15,6 +16,8 @@ class OrderController extends Controller
     public function __construct()
     {
         $this->cart = session()->get('cart', []);
+        //provide the stripe key
+        Stripe::setApiKey("YOUR STRIPE SECRET KEY HERE");
     }
 
     /**
@@ -22,8 +25,6 @@ class OrderController extends Controller
      */
     public function payOrderByStripe() 
     {
-        //provide the stripe key
-        Stripe::setApiKey("YOUR STRIPE SECRET KEY");
         //proceed to payment
         try {
             $checkout_session = Session::create([
@@ -38,7 +39,7 @@ class OrderController extends Controller
                     'quantity' => 1
                 ]],
                 'mode' => 'payment',
-                'success_url' => route('order.success', ['session_id' => '{CHECKOUT_SESSION_ID}'])
+                'success_url' => route('order.success').'?session_id={CHECKOUT_SESSION_ID}'
             ]);
             return redirect($checkout_session->url);
         } catch (ErrorException $e) {
@@ -67,9 +68,14 @@ class OrderController extends Controller
     {
         $sessionId = $request->get('session_id');
         if($sessionId) {
-            session()->forget('cart');
-            session()->forget('cartItemsTotal');
-            return view('success-paid');
+            try {
+                Session::retrieve($sessionId);
+                session()->forget('cart');
+                session()->forget('cartItemsTotal');
+                return view('success-paid');
+            } catch (InvalidRequestException $e) {
+                return to_route('home');
+            } 
         }else {
             return to_route('home');
         }
