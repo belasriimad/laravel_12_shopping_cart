@@ -29,7 +29,7 @@
                     <img src="{{ asset($product->image) }}" alt="Product Image" class="card-img-top">
                     <div class="card-body">
                         <div class="card-title">
-                            {{ $product->title }}
+                            {{ $product->name }}
                         </div>
                         <p class="card-text">
                             {{ $product->description }}
